@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090b0f">
+<title>Mithan Music — Listen without limits</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-symbol">M</div>
+      <div class="brand-name">MITHAN <span>MUSIC</span></div>
+    </div>
+    <p class="nav-label">Discover</p>
+    <nav class="nav">
+      <button class="active" data-view="home"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>Home</button>
+      <button data-view="search"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>Search</button>
+      <button data-view="library"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 4v16M12 8h5M12 12h5M12 16h5"/></svg>Your Library</button>
+    </nav>
+    <p class="nav-label">Your collection</p>
+    <nav class="nav">
+      <button data-view="liked"><svg viewBox="0 0 24 24"><path d="M20.8 8.7c0 5.1-8.8 11-8.8 11S3.2 13.8 3.2 8.7A4.7 4.7 0 0 1 12 6.3a4.7 4.7 0 0 1 8.8 2.4Z"/></svg>Liked Songs</button>
+      <button id="newPlaylist"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h11M4 18h8M19 14v7m-3.5-3.5h7"/></svg>Create playlist</button>
+    </nav>
+    <div class="side-playlists" id="playlistNames"></div>
+    <div class="side-bottom">MITHAN MUSIC<br>Crafted for the way you listen.</div>
+  </aside>
+
+  <main class="content">
+    <header class="topbar">
+      <div class="search">
+        <svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+        <input id="searchInput" placeholder="Search songs, artists, albums">
+      </div>
+      <div class="top-right">
+        <button class="upgrade" id="upgrade">EXPLORE PREMIUM</button>
+        <div class="profile">M</div>
+      </div>
+    </header>
+
+    <div id="page">
+      <section class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow">THE SOUND OF NOW</div>
+          <h1>Music that moves<br>with you.</h1>
+          <p>Your space for new discoveries, familiar favourites and everything in between.</p>
+          <button class="primary" id="heroPlay">START LISTENING</button>
+        </div>
+        <div class="hero-meta">MITHAN MUSIC — EST. 2026</div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Curated for you</h2>
+          <button>DISCOVER</button>
+        </div>
+        <div class="cards" id="featured">
+          <article class="album"><div class="art a1"><small>MM / 001</small><strong>Good<br>Energy</strong></div><h3>Good Energy</h3><p>A brighter kind of day</p></article>
+          <article class="album"><div class="art a2"><small>MM / 002</small><strong>After<br>Hours</strong></div><h3>After Hours</h3><p>For the late-night listener</p></article>
+          <article class="album"><div class="art a3"><small>MM / 003</small><strong>Heat<br>Check</strong></div><h3>Heat Check</h3><p>Turn the moment up</p></article>
+          <article class="album"><div class="art a4"><small>MM / 004</small><strong>Deep<br>Focus</strong></div><h3>Deep Focus</h3><p>Find your own frequency</p></article>
+          <article class="album"><div class="art a5"><small>MM / 005</small><strong>New<br>Wave</strong></div><h3>New Wave</h3><p>Fresh sounds, fresh perspective</p></article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2 id="listHeading">Your recent tracks</h2>
+          <button id="viewAll">VIEW ALL</button>
+        </div>
+        <div class="track-head">
+          <span>#</span><span>TRACK</span><span>ALBUM</span><span>TIME</span><span></span>
+        </div>
+        <div id="trackList">
+          <div class="empty">Your music collection starts here.<br>Use the add music control to load audio files stored on your device.</div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- Mini Bottom Player Bar -->
+<footer class="player">
+  <div class="now">
+    <div class="now-art" id="miniCover">M</div>
+    <div class="now-info">
+      <div class="now-title" id="nowTitle">Nothing playing</div>
+      <div class="now-artist" id="nowArtist">Choose a track from your library</div>
+    </div>
+    <button class="heart" id="likeBtn" aria-label="Like track">♡</button>
+  </div>
+  <div class="transport">
+    <div class="transport-buttons">
+      <button id="shuffleBtn" title="Shuffle">⤨</button>
+      <button id="prevBtn" title="Previous">|◀</button>
+      <button class="play" id="playBtn" title="Play">▶</button>
+      <button id="nextBtn" title="Next">▶|</button>
+      <button id="repeatBtn" title="Repeat">↻</button>
+    </div>
+    <div class="timeline">
+      <span id="currentTime">0:00</span>
+      <input type="range" id="seek" min="0" max="100" value="0">
+      <span id="duration">0:00</span>
+    </div>
+  </div>
+  <div class="right-controls">
+    <svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9a5 5 0 0 1 0 6M19 5a10 10 0 0 1 0 14"/></svg>
+    <input id="volume" type="range" min="0" max="1" step=".01" value=".8">
+  </div>
+</footer>
+
+<!-- Full-Screen Now Playing Page -->
+<div class="full-player" id="fullPlayer">
+  <div class="fp-top">
+    <button id="closeFp" aria-label="Back">⌄</button>
+    <span>NOW PLAYING</span>
+    <button id="fpLikeBtn" aria-label="Like">♡</button>
+  </div>
+  <div class="fp-body">
+    <div class="fp-art" id="fpArt">M</div>
+    <div class="fp-info">
+      <h2 id="fpTitle">Nothing playing</h2>
+      <p id="fpArtist">Choose a track</p>
+    </div>
+    <div class="fp-timeline">
+      <input type="range" id="fpSeek" min="0" max="100" value="0">
+      <div class="fp-times">
+        <span id="fpCurrent">0:00</span>
+        <span id="fpDuration">0:00</span>
+      </div>
+    </div>
+    <div class="fp-controls">
+      <button id="fpShuffle" title="Shuffle">⤨</button>
+      <button id="fpPrev" title="Previous">|◀</button>
+      <button class="fp-play" id="fpPlayBtn" title="Play">▶</button>
+      <button id="fpNext" title="Next">▶|</button>
+      <button id="fpRepeat" title="Repeat">↻</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="fileInput" accept="audio/*" multiple hidden>
+<audio id="audio"></audio>
+<script src="script.js"></script>
+</body>
+</html>
