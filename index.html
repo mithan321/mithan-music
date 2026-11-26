@@ -20,8 +20,9 @@
       <button data-view="search"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>Search</button>
       <button data-view="library"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 4v16M12 8h5M12 12h5M12 16h5"/></svg>Your Library</button>
     </nav>
-    <p class="nav-label">Your collection</p>
+    <p class="nav-label">Folders & Collection</p>
     <nav class="nav">
+      <button data-folder="Gujarati Songs"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Gujarati Songs</button>
       <button data-view="liked"><svg viewBox="0 0 24 24"><path d="M20.8 8.7c0 5.1-8.8 11-8.8 11S3.2 13.8 3.2 8.7A4.7 4.7 0 0 1 12 6.3a4.7 4.7 0 0 1 8.8 2.4Z"/></svg>Liked Songs</button>
       <button id="newPlaylist"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h11M4 18h8M19 14v7m-3.5-3.5h7"/></svg>Create playlist</button>
     </nav>
@@ -36,8 +37,9 @@
         <input id="searchInput" placeholder="Search songs, artists, albums">
       </div>
       <div class="top-right">
-        <button class="upgrade" id="upgrade">EXPLORE PREMIUM</button>
-        <div class="profile">M</div>
+        <button class="upgrade" id="upgrade">ADD LOCAL MP3</button>
+        <button class="signin-btn" id="authBtn" onclick="openAuth()">SIGN IN</button>
+        <div class="profile" id="profileIcon" title="Account">?</div>
       </div>
     </header>
 
@@ -46,7 +48,7 @@
         <div class="hero-copy">
           <div class="eyebrow">THE SOUND OF NOW</div>
           <h1>Music that moves<br>with you.</h1>
-          <p>Your space for new discoveries, familiar favourites and everything in between.</p>
+          <p>Sign in to unlock unlimited streaming, Gujarati hits, and instant offline downloads.</p>
           <button class="primary" id="heroPlay">START LISTENING</button>
         </div>
         <div class="hero-meta">MITHAN MUSIC — EST. 2026</div>
@@ -54,29 +56,27 @@
 
       <section class="section">
         <div class="section-head">
-          <h2>Curated for you</h2>
-          <button>DISCOVER</button>
+          <h2>Folders & Curated</h2>
+          <button id="viewAllTop">ALL SONGS</button>
         </div>
         <div class="cards" id="featured">
-          <article class="album"><div class="art a1"><small>MM / 001</small><strong>Good<br>Energy</strong></div><h3>Good Energy</h3><p>A brighter kind of day</p></article>
-          <article class="album"><div class="art a2"><small>MM / 002</small><strong>After<br>Hours</strong></div><h3>After Hours</h3><p>For the late-night listener</p></article>
-          <article class="album"><div class="art a3"><small>MM / 003</small><strong>Heat<br>Check</strong></div><h3>Heat Check</h3><p>Turn the moment up</p></article>
-          <article class="album"><div class="art a4"><small>MM / 004</small><strong>Deep<br>Focus</strong></div><h3>Deep Focus</h3><p>Find your own frequency</p></article>
-          <article class="album"><div class="art a5"><small>MM / 005</small><strong>New<br>Wave</strong></div><h3>New Wave</h3><p>Fresh sounds, fresh perspective</p></article>
+          <article class="album"><div class="art a1"><small>FOLDER / 01</small><strong>Gujarati<br>Songs</strong></div><h3>Gujarati Songs</h3><p>Jigardan Gadhavi, Sachin-Jigar & more</p></article>
+          <article class="album"><div class="art a2"><small>MM / 002</small><strong>Good<br>Energy</strong></div><h3>Good Energy</h3><p>A brighter kind of day</p></article>
+          <article class="album"><div class="art a3"><small>MM / 003</small><strong>After<br>Hours</strong></div><h3>After Hours</h3><p>For the late-night listener</p></article>
+          <article class="album"><div class="art a4"><small>MM / 004</small><strong>Heat<br>Check</strong></div><h3>Heat Check</h3><p>Turn the moment up</p></article>
+          <article class="album"><div class="art a5"><small>MM / 005</small><strong>Deep<br>Focus</strong></div><h3>Deep Focus</h3><p>Find your own frequency</p></article>
         </div>
       </section>
 
       <section class="section">
         <div class="section-head">
-          <h2 id="listHeading">Your recent tracks</h2>
+          <h2 id="listHeading">All recent tracks</h2>
           <button id="viewAll">VIEW ALL</button>
         </div>
         <div class="track-head">
-          <span>#</span><span>TRACK</span><span>ALBUM</span><span>TIME</span><span></span>
+          <span>#</span><span>TRACK</span><span>FOLDER / ALBUM</span><span>TIME</span><span>ACTIONS</span>
         </div>
-        <div id="trackList">
-          <div class="empty">Your music collection starts here.<br>Use the add music control to load audio files stored on your device.</div>
-        </div>
+        <div id="trackList"></div>
       </section>
     </div>
   </main>
@@ -88,7 +88,7 @@
     <div class="now-art" id="miniCover">M</div>
     <div class="now-info">
       <div class="now-title" id="nowTitle">Nothing playing</div>
-      <div class="now-artist" id="nowArtist">Choose a track from your library</div>
+      <div class="now-artist" id="nowArtist">Sign in to play music</div>
     </div>
     <button class="heart" id="likeBtn" aria-label="Like track">♡</button>
   </div>
@@ -117,7 +117,10 @@
   <div class="fp-top">
     <button id="closeFp" aria-label="Back">⌄</button>
     <span>NOW PLAYING</span>
-    <button id="fpLikeBtn" aria-label="Like">♡</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button id="fpDownloadBtn" title="Download Song" style="font-size:18px">⬇</button>
+      <button id="fpLikeBtn" aria-label="Like">♡</button>
+    </div>
   </div>
   <div class="fp-body">
     <div class="fp-art" id="fpArt">M</div>
@@ -139,6 +142,26 @@
       <button id="fpNext" title="Next">▶|</button>
       <button id="fpRepeat" title="Repeat">↻</button>
     </div>
+  </div>
+</div>
+
+<!-- Firebase Sign In / Sign Up Modal -->
+<div class="auth-overlay" id="authModal">
+  <div class="auth-box">
+    <button class="auth-close" onclick="closeAuth()">✕</button>
+    <div class="brand-symbol" style="margin:0 auto 14px">M</div>
+    <h3 id="authTitle">Sign in to Mithan Music</h3>
+    <p id="authSub">Sign in with your account to play or download songs.</p>
+    <form id="authForm">
+      <input type="text" id="loginName" placeholder="Your Name (e.g. Mithan)" style="display:none">
+      <input type="email" id="loginEmail" placeholder="Email Address" required>
+      <input type="password" id="loginPass" placeholder="Password (min 6 chars)" minlength="6" required>
+      <button type="submit" class="primary" id="authSubmitBtn" style="width:100%;padding:12px;margin-top:6px">SIGN IN</button>
+    </form>
+    <p style="margin:16px 0 0;font-size:12px">
+      <span id="authSwitchText">New here?</span>
+      <button type="button" id="toggleAuthMode" style="background:none;border:0;color:var(--accent);font-weight:700;text-decoration:underline">Create Account</button>
+    </p>
   </div>
 </div>
 
