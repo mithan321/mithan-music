@@ -1,173 +1,132 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#090b0f">
-<title>Mithan Music — Listen without limits</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mithan Music Studio</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-<div class="shell">
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-symbol">M</div>
-      <div class="brand-name">MITHAN <span>MUSIC</span></div>
-    </div>
-    <p class="nav-label">Discover</p>
-    <nav class="nav">
-      <button class="active" data-view="home"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>Home</button>
-      <button data-view="search"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>Search</button>
-      <button data-view="library"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 4v16M12 8h5M12 12h5M12 16h5"/></svg>Your Library</button>
-    </nav>
-    <p class="nav-label">Folders & Collection</p>
-    <nav class="nav">
-      <button data-folder="Gujarati Songs"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Gujarati Songs</button>
-      <button data-view="liked"><svg viewBox="0 0 24 24"><path d="M20.8 8.7c0 5.1-8.8 11-8.8 11S3.2 13.8 3.2 8.7A4.7 4.7 0 0 1 12 6.3a4.7 4.7 0 0 1 8.8 2.4Z"/></svg>Liked Songs</button>
-      <button id="newPlaylist"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h11M4 18h8M19 14v7m-3.5-3.5h7"/></svg>Create playlist</button>
-    </nav>
-    <div class="side-playlists" id="playlistNames"></div>
-    <div class="side-bottom">MITHAN MUSIC<br>Crafted for the way you listen.</div>
-  </aside>
-
-  <main class="content">
-    <header class="topbar">
-      <div class="search">
-        <svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
-        <input id="searchInput" placeholder="Search songs, artists, albums">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#"><span class="brand-mark">M</span><span><b>MITHAN</b><small>MUSIC STUDIO</small></span></a>
+      <div class="side-label">WORKSPACE</div>
+      <button class="nav-link active" data-view="overview"><span>▦</span> Overview</button>
+      <button class="nav-link" data-view="upload"><span>＋</span> Upload music</button>
+      <button class="nav-link" data-view="songs"><span>♫</span> Songs library</button>
+      <button class="nav-link" data-view="artists"><span>◉</span> Artist profiles</button>
+      <div class="sidebar-bottom">
+        <div class="secure-note"><span class="secure-dot"></span><div><b>Private workspace</b><small>Admin access only</small></div></div>
+        <button id="logoutBtn" class="logout-btn" hidden>Sign out ↗</button>
       </div>
-      <div class="top-right">
-        <button class="upgrade" id="upgrade">ADD LOCAL MP3</button>
-        <button class="signin-btn" id="authBtn" onclick="openAuth()">SIGN IN</button>
-        <div class="profile" id="profileIcon" title="Account">?</div>
-      </div>
-    </header>
+    </aside>
 
-    <div id="page">
-      <section class="hero">
-        <div class="hero-copy">
-          <div class="eyebrow">THE SOUND OF NOW</div>
-          <h1>Music that moves<br>with you.</h1>
-          <p>Sign in to unlock unlimited streaming, Gujarati hits, and instant offline downloads.</p>
-          <button class="primary" id="heroPlay">START LISTENING</button>
-        </div>
-        <div class="hero-meta">MITHAN MUSIC — EST. 2026</div>
-      </section>
+    <main class="main">
+      <header class="topbar">
+        <div><div class="eyebrow">MUSIC MANAGEMENT</div><h1 id="pageTitle">Overview</h1></div>
+        <div class="top-right"><span class="status-pill"><i></i> Supabase connected</span><div class="avatar">M</div></div>
+      </header>
 
-      <section class="section">
-        <div class="section-head">
-          <h2>Folders & Curated</h2>
-          <button id="viewAllTop">ALL SONGS</button>
-        </div>
-        <div class="cards" id="featured">
-          <article class="album"><div class="art a1"><small>FOLDER / 01</small><strong>Gujarati<br>Songs</strong></div><h3>Gujarati Songs</h3><p>Jigardan Gadhavi, Sachin-Jigar & more</p></article>
-          <article class="album"><div class="art a2"><small>MM / 002</small><strong>Good<br>Energy</strong></div><h3>Good Energy</h3><p>A brighter kind of day</p></article>
-          <article class="album"><div class="art a3"><small>MM / 003</small><strong>After<br>Hours</strong></div><h3>After Hours</h3><p>For the late-night listener</p></article>
-          <article class="album"><div class="art a4"><small>MM / 004</small><strong>Heat<br>Check</strong></div><h3>Heat Check</h3><p>Turn the moment up</p></article>
-          <article class="album"><div class="art a5"><small>MM / 005</small><strong>Deep<br>Focus</strong></div><h3>Deep Focus</h3><p>Find your own frequency</p></article>
+      <section id="loginView" class="login-wrap">
+        <div class="login-card">
+          <div class="login-symbol">M</div>
+          <div class="eyebrow">WELCOME BACK</div>
+          <h2>Sign in to your studio</h2>
+          <p class="muted">This private dashboard is reserved for the Mithan Music administrator.</p>
+          <form id="loginForm">
+            <label>Email address</label>
+            <input id="email" type="email" autocomplete="username" placeholder="admin@example.com" required>
+            <label>Password</label>
+            <input id="password" type="password" autocomplete="current-password" placeholder="Your password" required>
+            <button class="primary-btn full" type="submit">Sign in <span>→</span></button>
+            <p id="loginMessage" class="form-message"></p>
+          </form>
+          <small class="login-foot">Secure authentication powered by Supabase</small>
         </div>
       </section>
 
-      <section class="section">
-        <div class="section-head">
-          <h2 id="listHeading">All recent tracks</h2>
-          <button id="viewAll">VIEW ALL</button>
-        </div>
-        <div class="track-head">
-          <span>#</span><span>TRACK</span><span>FOLDER / ALBUM</span><span>TIME</span><span>ACTIONS</span>
-        </div>
-        <div id="trackList"></div>
+      <section id="dashboardView" hidden>
+        <section class="view active" id="overviewView">
+          <div class="welcome-banner">
+            <div><div class="eyebrow light">YOUR MUSIC. YOUR CONTROL.</div><h2>Welcome to your studio.</h2><p>Manage your catalogue and publish music to Mithan Music.</p></div>
+            <div class="banner-art">M<span>♪</span></div>
+          </div>
+          <div class="stats-grid">
+            <article class="stat-card"><span class="stat-icon">♫</span><p>Total songs</p><strong id="songCount">—</strong><small>In your music library</small></article>
+            <article class="stat-card"><span class="stat-icon">◉</span><p>Artist profiles</p><strong id="artistCount">—</strong><small>Created in this studio</small></article>
+            <article class="stat-card"><span class="stat-icon">☁</span><p>Storage</p><strong>Connected</strong><small>mithan-music bucket</small></article>
+          </div>
+          <div class="section-heading"><div><div class="eyebrow">QUICK ACTIONS</div><h2>What would you like to do?</h2></div></div>
+          <div class="quick-grid">
+            <button class="quick-card" data-go="upload"><span class="quick-icon">＋</span><b>Upload new music</b><small>Add one or multiple audio tracks</small><span class="quick-arrow">↗</span></button>
+            <button class="quick-card" data-go="artists"><span class="quick-icon">◉</span><b>Create artist profile</b><small>Add an artist photo and biography</small><span class="quick-arrow">↗</span></button>
+            <button class="quick-card" data-go="songs"><span class="quick-icon">♫</span><b>Manage your songs</b><small>Review, edit or remove tracks</small><span class="quick-arrow">↗</span></button>
+          </div>
+          <div class="section-heading"><div><div class="eyebrow">LATEST ADDITIONS</div><h2>Recently uploaded</h2></div><button class="text-btn" data-go="songs">View library →</button></div>
+          <div id="recentSongs" class="song-list"></div>
+        </section>
+
+        <section class="view" id="uploadView">
+          <div class="intro-row"><div><div class="eyebrow">PUBLISH MUSIC</div><h2>Upload tracks</h2><p class="muted">Select multiple audio files to publish them together.</p></div></div>
+          <div class="content-card">
+            <form id="uploadForm">
+              <div class="field-grid">
+                <div class="field"><label>Artist name</label><input id="uploadArtist" placeholder="Artist name" required></div>
+                <div class="field"><label>Album / release</label><input id="uploadAlbum" placeholder="Single or album name"></div>
+              </div>
+              <div class="field"><label>Audio files <span class="required">*</span></label>
+                <label class="dropzone" for="audioFiles"><span class="upload-symbol">↑</span><b>Choose MP3 or audio files</b><small>Multiple files supported · MP3 recommended</small><span id="audioFileNames" class="file-names">No files selected</span></label>
+                <input id="audioFiles" type="file" accept="audio/*,.mp3" multiple required hidden>
+              </div>
+              <div class="field"><label>Cover image <span class="optional">Optional · shared by selected tracks</span></label>
+                <label class="cover-picker" for="coverFile"><span class="cover-preview" id="coverPreview">＋</span><span><b>Choose cover artwork</b><small>JPG, PNG or WebP</small></span><span class="browse">Browse</span></label>
+                <input id="coverFile" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+              </div>
+              <div class="notice">Each audio file will be added as a separate song. Its title is taken from the file name; you can edit it later in Songs Library.</div>
+              <button class="primary-btn" type="submit" id="uploadSubmit">Upload selected tracks <span>→</span></button>
+              <div id="uploadProgress" class="progress-area" hidden><div class="progress-track"><div id="progressBar"></div></div><p id="progressText">Preparing upload…</p></div>
+              <p id="uploadMessage" class="form-message"></p>
+            </form>
+          </div>
+        </section>
+
+        <section class="view" id="songsView">
+          <div class="section-heading"><div><div class="eyebrow">YOUR CATALOGUE</div><h2>Songs library</h2><p class="muted">Edit song details or remove tracks from the public catalogue.</p></div><button class="primary-btn compact" data-go="upload">＋ Upload songs</button></div>
+          <div class="content-card"><div id="allSongs" class="song-list"></div></div>
+        </section>
+
+        <section class="view" id="artistsView">
+          <div class="intro-row"><div><div class="eyebrow">ARTIST MANAGEMENT</div><h2>Artist profiles</h2><p class="muted">Create a profile with a photo and biography.</p></div></div>
+          <div class="content-card">
+            <form id="artistForm">
+              <div class="field"><label>Artist name <span class="required">*</span></label><input id="artistName" required placeholder="Enter artist name"></div>
+              <div class="field"><label>Biography</label><textarea id="artistBio" rows="4" placeholder="Write a short artist biography…"></textarea></div>
+              <div class="field"><label>Artist photo</label><input id="artistPhoto" type="file" accept="image/*" class="file-input"></div>
+              <button class="primary-btn" type="submit" id="artistSubmit">Save artist profile <span>→</span></button>
+              <p id="artistMessage" class="form-message"></p>
+            </form>
+          </div>
+          <div class="section-heading"><div><div class="eyebrow">YOUR ARTISTS</div><h2>Saved profiles</h2></div></div>
+          <div id="artistList" class="artist-grid"></div>
+        </section>
       </section>
-    </div>
-  </main>
-</div>
+      <footer>© <span id="year"></span> Mithan Music Studio <span>·</span> Independent admin dashboard</footer>
+    </main>
+  </div>
 
-<!-- Mini Bottom Player Bar -->
-<footer class="player">
-  <div class="now">
-    <div class="now-art" id="miniCover">M</div>
-    <div class="now-info">
-      <div class="now-title" id="nowTitle">Nothing playing</div>
-      <div class="now-artist" id="nowArtist">Sign in to play music</div>
-    </div>
-    <button class="heart" id="likeBtn" aria-label="Like track">♡</button>
-  </div>
-  <div class="transport">
-    <div class="transport-buttons">
-      <button id="shuffleBtn" title="Shuffle">⤨</button>
-      <button id="prevBtn" title="Previous">|◀</button>
-      <button class="play" id="playBtn" title="Play">▶</button>
-      <button id="nextBtn" title="Next">▶|</button>
-      <button id="repeatBtn" title="Repeat">↻</button>
-    </div>
-    <div class="timeline">
-      <span id="currentTime">0:00</span>
-      <input type="range" id="seek" min="0" max="100" value="0">
-      <span id="duration">0:00</span>
-    </div>
-  </div>
-  <div class="right-controls">
-    <svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9a5 5 0 0 1 0 6M19 5a10 10 0 0 1 0 14"/></svg>
-    <input id="volume" type="range" min="0" max="1" step=".01" value=".8">
-  </div>
-</footer>
-
-<!-- Full-Screen Now Playing Page -->
-<div class="full-player" id="fullPlayer">
-  <div class="fp-top">
-    <button id="closeFp" aria-label="Back">⌄</button>
-    <span>NOW PLAYING</span>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button id="fpDownloadBtn" title="Download Song" style="font-size:18px">⬇</button>
-      <button id="fpLikeBtn" aria-label="Like">♡</button>
-    </div>
-  </div>
-  <div class="fp-body">
-    <div class="fp-art" id="fpArt">M</div>
-    <div class="fp-info">
-      <h2 id="fpTitle">Nothing playing</h2>
-      <p id="fpArtist">Choose a track</p>
-    </div>
-    <div class="fp-timeline">
-      <input type="range" id="fpSeek" min="0" max="100" value="0">
-      <div class="fp-times">
-        <span id="fpCurrent">0:00</span>
-        <span id="fpDuration">0:00</span>
-      </div>
-    </div>
-    <div class="fp-controls">
-      <button id="fpShuffle" title="Shuffle">⤨</button>
-      <button id="fpPrev" title="Previous">|◀</button>
-      <button class="fp-play" id="fpPlayBtn" title="Play">▶</button>
-      <button id="fpNext" title="Next">▶|</button>
-      <button id="fpRepeat" title="Repeat">↻</button>
-    </div>
-  </div>
-</div>
-
-<!-- Firebase Sign In / Sign Up Modal -->
-<div class="auth-overlay" id="authModal">
-  <div class="auth-box">
-    <button class="auth-close" onclick="closeAuth()">✕</button>
-    <div class="brand-symbol" style="margin:0 auto 14px">M</div>
-    <h3 id="authTitle">Sign in to Mithan Music</h3>
-    <p id="authSub">Sign in with your account to play or download songs.</p>
-    <form id="authForm">
-      <input type="text" id="loginName" placeholder="Your Name (e.g. Mithan)" style="display:none">
-      <input type="email" id="loginEmail" placeholder="Email Address" required>
-      <input type="password" id="loginPass" placeholder="Password (min 6 chars)" minlength="6" required>
-      <button type="submit" class="primary" id="authSubmitBtn" style="width:100%;padding:12px;margin-top:6px">SIGN IN</button>
+  <dialog id="editDialog" class="edit-dialog">
+    <form id="editForm" method="dialog">
+      <div class="dialog-head"><div><div class="eyebrow">SONG DETAILS</div><h2>Edit track</h2></div><button type="button" class="close-btn" id="closeDialog">×</button></div>
+      <input id="editId" type="hidden">
+      <label>Song title</label><input id="editTitle" required>
+      <label>Artist</label><input id="editArtist">
+      <label>Album</label><input id="editAlbum">
+      <div class="dialog-actions"><button type="button" class="secondary-btn" id="cancelEdit">Cancel</button><button type="submit" class="primary-btn">Save changes</button></div>
+      <p id="editMessage" class="form-message"></p>
     </form>
-    <p style="margin:16px 0 0;font-size:12px">
-      <span id="authSwitchText">New here?</span>
-      <button type="button" id="toggleAuthMode" style="background:none;border:0;color:var(--accent);font-weight:700;text-decoration:underline">Create Account</button>
-    </p>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-<input type="file" id="fileInput" accept="audio/*" multiple hidden>
-<audio id="audio"></audio>
-<script src="script.js"></script>
+  </dialog>
+  <script src="config.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
