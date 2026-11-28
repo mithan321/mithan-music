@@ -42,32 +42,23 @@ const firebaseConfig = {
 };
 
 let fbAuth = null, fbFns = null;
-
 (async () => {
   try {
     const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js");
     const authMod = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js");
     fbAuth = authMod.getAuth(initializeApp(firebaseConfig));
     fbFns = authMod;
-
     authMod.onAuthStateChanged(fbAuth, user => {
-      currentUser = user ? {
-        name: user.displayName || user.email.split('@')[0],
-        email: user.email
-      } : null;
-
+      currentUser = user ? { name: user.displayName || user.email.split('@')[0], email: user.email } : null;
       updateAuthUI();
     });
   } catch (e) {}
 })();
 
 // ==========================================
-// 3. PROTECTED SONGS LIST
+// 3. PROTECTED SONGS LIST (10 Gujarati Songs + Time-Synced Lyrics)
 // ==========================================
-const _d = s => {
-  try { return atob(s); }
-  catch { return s; }
-};
+const _d = s => { try { return atob(s); } catch { return s; } };
 
 let songs = [
   {
@@ -204,7 +195,7 @@ let songs = [
     artist: "Parthiv Gohil, Meghdhanush",
     album: "Gujarati Songs",
     cover: "https://i.ytimg.com/vi/F7mw6khe9Ss/hq720.jpg",
-    url: _d("aHR0cHM6Ly93d3cuaW1hZ2VydXJsLmNvbS9yMi9kZWZhdWx0L2F1ZGlvLzE3OTU3MDU2Mjk1MTQtYzEwNjlmMTMtYjIwMi00OTIzLTlhZjQtZDNiZWM4OTliMjM4Lm1wMw=="),
+    url: _d("aHR0cHM6Ly93d3cuaW1hZ2UydXJsLmNvbS9yMi9kZWZhdWx0L2F1ZGlvLzE3OTU3MDU2Mjk1MTQtYzEwNjlmMTMtYjIwMi00OTIzLTlhZjQtZDNiZWM4OTliMjM4Lm1wMw=="),
     duration: "—",
     lyrics: ""
   },
@@ -213,7 +204,7 @@ let songs = [
     artist: "Rito Riba",
     album: "Good Energy",
     cover: "https://pagaljatt.co.in/wp-content/uploads/2026/11/Kabile-Tareef-Tu-Rito.jpg",
-    url: _d("aHR0cHM6Ly93d3cuaW1hZ2VydXJsLmNvbS9yMi9kZWZhdWx0L2F1ZGlvLzE3OTU2Nzc2ODY0ODItZTlhM2FhMDMtNDM4ZS00YTc1LWEzMjQtYzJiOTRlMDU0NWRmLm1wMw=="),
+    url: _d("aHR0cHM6Ly93d3cuaW1hZ2UydXJsLmNvbS9yMi9kZWZhdWx0L2F1ZGlvLzE3OTU2Nzc2ODY0ODItZTlhM2FhMDMtNDM4ZS00YTc1LWEzMjQtYzJiOTRlMDU0NWRmLm1wMw=="),
     duration: "—",
     lyrics: ""
   },
@@ -229,14 +220,14 @@ let songs = [
 ];
 
 // ==========================================
-// 4. STATE & STORAGE
+// 4. STATE & STORAGE (Saved Likes, Playlists, History)
 // ==========================================
 let current = -1;
 let liked = new Set(JSON.parse(localStorage.getItem('mithan_liked') || '[]'));
 let customPlaylists = JSON.parse(localStorage.getItem('mithan_playlists') || '{}');
 let recentHistory = JSON.parse(localStorage.getItem('mithan_recent') || '[]');
 let shuffle = false;
-let repeatMode = 0;
+let repeatMode = 0; // 0 = Off, 1 = Repeat All, 2 = Repeat One
 let view = 'home';
 let activePlaylist = null;
 let isSignUpMode = false;
@@ -254,19 +245,11 @@ const saveData = () => {
   $('pmLikedCount').textContent = liked.size;
 };
 
-const fmt = n => Number.isFinite(n)
-  ? Math.floor(n / 60) + ':' + String(Math.floor(n % 60)).padStart(2, '0')
-  : '0:00';
+const fmt = n => Number.isFinite(n) ? Math.floor(n / 60) + ':' + String(Math.floor(n % 60)).padStart(2, '0') : '0:00';
+const safe = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function toast(s) { $('toast').textContent = s; $('toast').classList.add('show'); setTimeout(() => $('toast').classList.remove('show'), 2600); }
 
-const safe = s => String(s).replace(/[&<>"']/g, c => ({
-  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-}[c]));
-
-function toast(s) {
-  $('toast').textContent = s;
-  $('toast').classList.add('show');
-  setTimeout(() => $('toast').classList.remove('show'), 2600);
-}// ==========================================
+// ==========================================
 // 5. TIME-SYNCED LYRICS PARSER & HIGHLIGHTER
 // ==========================================
 function loadSyncedLyrics(raw, totalDur) {
@@ -294,7 +277,6 @@ function loadSyncedLyrics(raw, totalDur) {
   } else {
     const dur = Number.isFinite(totalDur) && totalDur > 10 ? totalDur : lines.length * 4;
     const step = dur / lines.length;
-
     lines.forEach((line, idx) => {
       parsedLyrics.push({ time: idx * step, text: line.trim() });
     });
@@ -316,9 +298,7 @@ function loadSyncedLyrics(raw, totalDur) {
 
 function syncLyricsHighlight(curTime) {
   if (!parsedLyrics.length) return;
-
   let newIdx = -1;
-
   for (let i = 0; i < parsedLyrics.length; i++) {
     if (curTime >= parsedLyrics[i].time) newIdx = i;
     else break;
@@ -326,9 +306,7 @@ function syncLyricsHighlight(curTime) {
 
   if (newIdx !== activeLyricIdx) {
     activeLyricIdx = newIdx;
-
     const allLines = $('fpLyricsText').querySelectorAll('.lyric-line');
-
     allLines.forEach((el, idx) => {
       el.classList.toggle('active', idx === activeLyricIdx);
     });
@@ -336,7 +314,6 @@ function syncLyricsHighlight(curTime) {
     if (activeLyricIdx >= 0 && allLines[activeLyricIdx]) {
       const container = $('fpLyricsBox');
       const activeEl = allLines[activeLyricIdx];
-
       container.scrollTo({
         top: activeEl.offsetTop - container.offsetTop - container.clientHeight / 2 + activeEl.clientHeight / 2,
         behavior: 'smooth'
@@ -363,18 +340,12 @@ document.addEventListener('click', e => {
 
 $('pmLiked').onclick = () => {
   $('profileMenu').classList.remove('open');
-  view = 'liked';
-  activePlaylist = null;
-  setActiveNav('liked');
-  render();
+  view = 'liked'; activePlaylist = null; setActiveNav('liked'); render();
 };
 
 $('pmRecent').onclick = () => {
   $('profileMenu').classList.remove('open');
-  view = 'library';
-  activePlaylist = null;
-  setActiveNav('library');
-  render();
+  view = 'library'; activePlaylist = null; setActiveNav('library'); render();
 };
 
 $('pmNewPl').onclick = () => {
@@ -384,7 +355,6 @@ $('pmNewPl').onclick = () => {
 
 $('pmSleep').onclick = () => {
   clearTimeout(sleepTimerId);
-
   if (sleepMinutes === 0) sleepMinutes = 15;
   else if (sleepMinutes === 15) sleepMinutes = 30;
   else sleepMinutes = 0;
@@ -393,9 +363,7 @@ $('pmSleep').onclick = () => {
     $('pmSleepState').textContent = sleepMinutes + ' min';
     $('sleepBadge').textContent = '⏱ ' + sleepMinutes + 'm';
     $('sleepBadge').style.display = 'inline-block';
-
     toast('Sleep timer set for ' + sleepMinutes + ' minutes');
-
     sleepTimerId = setTimeout(() => {
       audio.pause();
       $('playBtn').textContent = '▶';
@@ -405,7 +373,6 @@ $('pmSleep').onclick = () => {
       $('sleepBadge').style.display = 'none';
       toast('Sleep timer paused playback');
     }, sleepMinutes * 60 * 1000);
-
   } else {
     $('pmSleepState').textContent = 'Off';
     $('sleepBadge').style.display = 'none';
@@ -429,7 +396,6 @@ $('pmAuthAction').onclick = () => {
 function renderSidebarPlaylists() {
   const box = $('playlistNames');
   const names = Object.keys(customPlaylists);
-
   box.innerHTML = names.map(name =>
     `<button class="${view === 'playlist' && activePlaylist === name ? 'active' : ''}" data-cpl="${safe(name)}">🎵 ${safe(name)} (${customPlaylists[name].length})</button>`
   ).join('');
@@ -447,14 +413,10 @@ function renderSidebarPlaylists() {
 
 function createNewPlaylist() {
   if (!requireAuth()) return;
-
   const name = prompt('Enter new playlist name (e.g. Garba Hits, Chill):');
   if (!name || !name.trim()) return;
-
   const clean = name.trim();
-
   if (!customPlaylists[clean]) customPlaylists[clean] = [];
-
   saveData();
   renderSidebarPlaylists();
   toast('Playlist "' + clean + '" created!');
@@ -464,31 +426,20 @@ $('newPlaylist').onclick = createNewPlaylist;
 
 function addToCustomPlaylist(songIdx) {
   if (!requireAuth()) return;
-
   const names = Object.keys(customPlaylists);
-
   if (!names.length) {
     const first = prompt('No custom playlist yet! Enter a name to create one:');
     if (!first || !first.trim()) return;
-
     customPlaylists[first.trim()] = [songIdx];
     saveData();
     renderSidebarPlaylists();
     toast('Added to "' + first.trim() + '"');
     return;
   }
-
-  const choice = prompt(
-    'Type playlist name to add song:\nAvailable: ' + names.join(', '),
-    names[0]
-  );
-
+  const choice = prompt('Type playlist name to add song:\nAvailable: ' + names.join(', '), names[0]);
   if (!choice || !choice.trim()) return;
-
   const target = choice.trim();
-
   if (!customPlaylists[target]) customPlaylists[target] = [];
-
   if (!customPlaylists[target].includes(songIdx)) {
     customPlaylists[target].push(songIdx);
     saveData();
@@ -505,136 +456,63 @@ function addToCustomPlaylist(songIdx) {
 function openAuth() {
   if (currentUser) {
     if (fbAuth && fbFns) fbFns.signOut(fbAuth).catch(() => {});
-
-    currentUser = null;
-    localStorage.removeItem('mithan_user');
-    audio.pause();
-
-    $('playBtn').textContent = '▶';
-    $('fpPlayBtn').textContent = '▶';
-
-    closeFullPlayer();
-    updateAuthUI();
-    toast('Signed out');
-
+    currentUser = null; localStorage.removeItem('mithan_user'); audio.pause();
+    $('playBtn').textContent = '▶'; $('fpPlayBtn').textContent = '▶'; closeFullPlayer(); updateAuthUI(); toast('Signed out');
   } else {
     $('authModal').classList.add('open');
   }
 }
-
-function closeAuth() {
-  $('authModal').classList.remove('open');
-}
-
-function requireAuth() {
-  if (!currentUser) {
-    $('authModal').classList.add('open');
-    toast('Please sign in first');
-    return false;
-  }
-
-  return true;
-}
+function closeAuth() { $('authModal').classList.remove('open'); }
+function requireAuth() { if (!currentUser) { $('authModal').classList.add('open'); toast('Please sign in first'); return false; } return true; }
 
 function updateAuthUI() {
   if (currentUser) {
-    $('authBtn').textContent = 'SIGN OUT';
-    $('authBtn').classList.add('signed-in');
-
+    $('authBtn').textContent = 'SIGN OUT'; $('authBtn').classList.add('signed-in');
     $('profileIcon').textContent = currentUser.name.slice(0, 1).toUpperCase();
     $('pmName').textContent = currentUser.name;
     $('pmEmail').textContent = currentUser.email;
     $('pmAuthAction').textContent = '🚪 Sign Out';
-
-    if (current < 0) {
-      $('nowArtist').textContent = 'Welcome, ' + currentUser.name;
-    }
-
+    if (current < 0) $('nowArtist').textContent = 'Welcome, ' + currentUser.name;
   } else {
-    $('authBtn').textContent = 'SIGN IN';
-    $('authBtn').classList.remove('signed-in');
-
+    $('authBtn').textContent = 'SIGN IN'; $('authBtn').classList.remove('signed-in');
     $('profileIcon').textContent = '?';
     $('pmName').textContent = 'Guest Listener';
     $('pmEmail').textContent = 'Sign in to sync profile';
     $('pmAuthAction').textContent = '🔑 Sign In / Create Account';
-
-    if (current < 0) {
-      $('nowArtist').textContent = 'Sign in to play music';
-    }
+    if (current < 0) $('nowArtist').textContent = 'Sign in to play music';
   }
-
   $('pmLikedCount').textContent = liked.size;
 }
 
 $('toggleAuthMode').onclick = () => {
   isSignUpMode = !isSignUpMode;
-
   $('loginName').style.display = isSignUpMode ? 'block' : 'none';
   $('loginName').required = isSignUpMode;
-
-  $('authTitle').textContent = isSignUpMode
-    ? 'Create Mithan Music Account'
-    : 'Sign in to Mithan Music';
-
-  $('authSubmitBtn').textContent = isSignUpMode
-    ? 'CREATE ACCOUNT'
-    : 'SIGN IN';
-
-  $('authSwitchText').textContent = isSignUpMode
-    ? 'Already have an account?'
-    : 'New here?';
-
-  $('toggleAuthMode').textContent = isSignUpMode
-    ? 'Sign In'
-    : 'Create Account';
+  $('authTitle').textContent = isSignUpMode ? 'Create Mithan Music Account' : 'Sign in to Mithan Music';
+  $('authSubmitBtn').textContent = isSignUpMode ? 'CREATE ACCOUNT' : 'SIGN IN';
+  $('authSwitchText').textContent = isSignUpMode ? 'Already have an account?' : 'New here?';
+  $('toggleAuthMode').textContent = isSignUpMode ? 'Sign In' : 'Create Account';
 };
 
 $('authForm').onsubmit = async e => {
   e.preventDefault();
-
-  const name = $('loginName').value.trim();
-  const email = $('loginEmail').value.trim();
-  const pass = $('loginPass').value;
-
+  const name = $('loginName').value.trim(), email = $('loginEmail').value.trim(), pass = $('loginPass').value;
   try {
     if (fbAuth && fbFns) {
       if (isSignUpMode) {
         const cred = await fbFns.createUserWithEmailAndPassword(fbAuth, email, pass);
-
-        if (name) {
-          await fbFns.updateProfile(cred.user, { displayName: name });
-        }
-
-        currentUser = {
-          name: name || email.split('@')[0],
-          email
-        };
-
+        if (name) await fbFns.updateProfile(cred.user, { displayName: name });
+        currentUser = { name: name || email.split('@')[0], email };
       } else {
         const cred = await fbFns.signInWithEmailAndPassword(fbAuth, email, pass);
-
-        currentUser = {
-          name: cred.user.displayName || email.split('@')[0],
-          email
-        };
+        currentUser = { name: cred.user.displayName || email.split('@')[0], email };
       }
-
     } else {
-      currentUser = {
-        name: name || email.split('@')[0],
-        email
-      };
+      currentUser = { name: name || email.split('@')[0], email };
     }
-
     localStorage.setItem('mithan_user', JSON.stringify(currentUser));
-
-    updateAuthUI();
-    closeAuth();
-    $('authForm').reset();
-
+    updateAuthUI(); closeAuth(); $('authForm').reset();
     toast('Welcome, ' + currentUser.name + '!');
-
   } catch (err) {
     toast(err.message.replace('Firebase: ', ''));
   }
@@ -644,23 +522,17 @@ $('authForm').onsubmit = async e => {
 // 9. SEARCH BAR, RENDER & PLAYBACK
 // ==========================================
 function setActiveNav(v) {
-  document.querySelectorAll('.nav button').forEach(x => {
-    x.classList.toggle('active', x.dataset.view === v);
-  });
-
+  document.querySelectorAll('.nav button').forEach(x => x.classList.toggle('active', x.dataset.view === v));
   renderSidebarPlaylists();
 }
 
 $('searchInput').oninput = () => {
   const q = $('searchInput').value.trim();
-
   $('clearSearch').classList.toggle('show', q.length > 0);
-
   if (q) {
     view = 'home';
     activePlaylist = null;
   }
-
   render();
 };
 
@@ -672,28 +544,19 @@ $('clearSearch').onclick = () => {
 
 async function downloadSong(idx) {
   if (!requireAuth()) return;
-
-  const s = songs[idx];
-  if (!s) return;
-
+  const s = songs[idx]; if (!s) return;
   toast('Preparing "' + s.title + '"...');
-
   try {
     const res = await fetch(s.url);
     const blob = await res.blob();
-
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-
     a.href = url;
     a.download = s.title + '.mp3';
-
     document.body.appendChild(a);
     a.click();
     a.remove();
-
     setTimeout(() => URL.revokeObjectURL(url), 5000);
-
   } catch (e) {
     toast('Download protected by server CORS');
   }
@@ -701,475 +564,342 @@ async function downloadSong(idx) {
 
 function artHTML(s) {
   const letter = safe(s.title.slice(0, 1).toUpperCase());
-
-  return s.cover
-    ? `<img draggable="false" src="${safe(s.cover)}" onerror="this.parentElement.textContent='${letter}'">`
-    : letter;
+  return s.cover ? `<img draggable="false" src="${safe(s.cover)}" onerror="this.parentElement.textContent='${letter}'">` : letter;
 }
 
-function openFullPlayer() {
-  if (!requireAuth()) return;
+function openFullPlayer() { if (!requireAuth()) return; if (current < 0 && songs.length) play(0); $('fullPlayer').classList.add('open'); }
+function closeFullPlayer() { $('fullPlayer').classList.remove('open'); }
 
-  if (current < 0 && songs.length) {
-    play(0);
+function render() {
+  const list = $('trackList');
+  const q = $('searchInput').value.trim().toLowerCase();
+
+  // Hide hero & folders while actively searching so results show immediately
+  $('heroSection').style.display = q ? 'none' : 'flex';
+  $('featuredSection').style.display = q ? 'none' : 'block';
+
+  let ids = songs.map((_, i) => i);
+  if (view === 'liked') {
+    ids = ids.filter(i => liked.has(i));
+    $('listHeading').textContent = 'Liked songs (' + ids.length + ')';
+  } else if (view === 'library') {
+    ids = recentHistory.filter(i => songs[i]);
+    $('listHeading').textContent = 'Recently played (' + ids.length + ')';
+  } else if (view === 'playlist' && activePlaylist) {
+    ids = customPlaylists[activePlaylist] || ids.filter(i => songs[i].album === activePlaylist);
+    $('listHeading').textContent = 'Folder / Playlist: ' + activePlaylist;
+  } else {
+    $('listHeading').textContent = q ? 'Search results' : 'All recent tracks';
   }
 
-  $('fullPlayer').classList.add('open');
-}
+  if (q) {
+    ids = ids.filter(i => (songs[i].title + ' ' + songs[i].artist + ' ' + songs[i].album).toLowerCase().includes(q));
+  }
 
-function closeFullPlayer() {
-  $('fullPlayer').classList.remove('open');
-}// ==========================================
-// 5. TIME-SYNCED LYRICS PARSER & HIGHLIGHTER
-// ==========================================
-function loadSyncedLyrics(raw, totalDur) {
-  const box = $('fpLyricsText');
-  parsedLyrics = [];
-  activeLyricIdx = -1;
-
-  if (!raw || !raw.trim()) {
-    box.innerHTML = '<div class="lyric-line">Lyrics not added for this song yet.</div>';
+  if (!ids.length) {
+    list.innerHTML = `<div class="empty">${q ? `No songs matched "<strong>${safe(q)}</strong>".<br><button class="primary" style="margin-top:10px" onclick="document.getElementById('clearSearch').click()">CLEAR SEARCH</button>` : 'No songs in this section yet.'}</div>`;
     return;
   }
 
-  const lines = raw.trim().split('\n').filter(l => l.trim());
-  const timeRegex = /^\[(\d{1,2}):(\d{2}(?:\.\d+)?)\]\s*(.*)$/;
-  const hasTimestamps = lines.some(l => timeRegex.test(l.trim()));
+  list.innerHTML = ids.map((i, n) => {
+    let s = songs[i];
+    const isPlaying = i === current;
+    return `<div class="track ${isPlaying ? 'playing' : ''}">
+      <span class="track-index">${isPlaying ? '▶' : String(n + 1).padStart(2, '0')}</span>
+      <div class="track-main" data-play="${i}" style="cursor:pointer">
+        <div class="track-art">${artHTML(s)}</div>
+        <div style="min-width:0">
+          <div class="track-title">${safe(s.title)}</div>
+          <div class="track-artist">${safe(s.artist)}</div>
+        </div>
+      </div>
+      <span class="track-album">${safe(s.album || 'Single')}</span>
+      <span class="track-duration">${s.duration || '—'}</span>
+      <div style="display:flex;gap:4px;justify-content:flex-end">
+        <button data-addpl="${i}" title="Add to Playlist">＋</button>
+        <button data-dl="${i}" title="Download">⬇</button>
+        <button data-like="${i}" title="Like">${liked.has(i) ? '♥' : '♡'}</button>
+      </div>
+    </div>`;
+  }).join('');
 
-  if (hasTimestamps) {
-    lines.forEach(line => {
-      const m = line.trim().match(timeRegex);
-      if (m) {
-        const sec = parseInt(m[1], 10) * 60 + parseFloat(m[2]);
-        parsedLyrics.push({ time: sec, text: m[3] || '♪' });
-      }
-    });
-  } else {
-    const dur = Number.isFinite(totalDur) && totalDur > 10 ? totalDur : lines.length * 4;
-    const step = dur / lines.length;
-
-    lines.forEach((line, idx) => {
-      parsedLyrics.push({ time: idx * step, text: line.trim() });
-    });
-  }
-
-  box.innerHTML = parsedLyrics.map((item, idx) =>
-    `<div class="lyric-line" data-lidx="${idx}" data-time="${item.time}">${safe(item.text)}</div>`
-  ).join('');
-
-  box.querySelectorAll('.lyric-line').forEach(el => {
-    el.onclick = () => {
-      if (audio.duration) {
-        audio.currentTime = parseFloat(el.dataset.time);
-        syncLyricsHighlight(audio.currentTime);
-      }
-    };
+  list.querySelectorAll('[data-play]').forEach(x => x.onclick = () => { if (requireAuth()) { play(+x.dataset.play); openFullPlayer(); } });
+  list.querySelectorAll('[data-addpl]').forEach(x => x.onclick = e => { e.stopPropagation(); addToCustomPlaylist(+x.dataset.addpl); });
+  list.querySelectorAll('[data-dl]').forEach(x => x.onclick = e => { e.stopPropagation(); downloadSong(+x.dataset.dl); });
+  list.querySelectorAll('[data-like]').forEach(x => x.onclick = () => {
+    if (!requireAuth()) return;
+    let i = +x.dataset.like;
+    liked.has(i) ? liked.delete(i) : liked.add(i);
+    saveData();
+    render();
+    syncLike();
   });
 }
 
-function syncLyricsHighlight(curTime) {
-  if (!parsedLyrics.length) return;
+async function play(i) {
+  if (!requireAuth() || !songs.length) return;
+  current = (i + songs.length) % songs.length;
+  const s = songs[current];
 
-  let newIdx = -1;
+  // Track Recently Played
+  recentHistory = [current, ...recentHistory.filter(x => x !== current)].slice(0, 20);
+  saveData();
 
-  for (let i = 0; i < parsedLyrics.length; i++) {
-    if (curTime >= parsedLyrics[i].time) newIdx = i;
-    else break;
+  $('nowTitle').textContent = s.title;
+  $('nowArtist').textContent = s.artist;
+  $('miniCover').innerHTML = artHTML(s);
+  $('fpTitle').textContent = s.title;
+  $('fpArtist').textContent = s.artist;
+  $('fpArt').innerHTML = artHTML(s);
+  loadSyncedLyrics(s.lyrics, audio.duration);
+  if (s.lyrics && s.lyrics.trim()) $('fpLyricsBox').classList.add('open');
+  syncLike();
+  render();
+
+  if (activeBlobUrl) {
+    URL.revokeObjectURL(activeBlobUrl);
+    activeBlobUrl = null;
   }
 
-  if (newIdx !== activeLyricIdx) {
-    activeLyricIdx = newIdx;
-
-    const allLines = $('fpLyricsText').querySelectorAll('.lyric-line');
-
-    allLines.forEach((el, idx) => {
-      el.classList.toggle('active', idx === activeLyricIdx);
-    });
-
-    if (activeLyricIdx >= 0 && allLines[activeLyricIdx]) {
-      const container = $('fpLyricsBox');
-      const activeEl = allLines[activeLyricIdx];
-
-      container.scrollTo({
-        top: activeEl.offsetTop - container.offsetTop - container.clientHeight / 2 + activeEl.clientHeight / 2,
-        behavior: 'smooth'
-      });
-    }
+  try {
+    const res = await fetch(s.url);
+    const blob = await res.blob();
+    activeBlobUrl = URL.createObjectURL(blob);
+    audio.src = activeBlobUrl;
+    await audio.play();
+    $('playBtn').textContent = 'Ⅱ';
+    $('fpPlayBtn').textContent = 'Ⅱ';
+    setTimeout(() => audio.removeAttribute('src'), 300);
+  } catch (err) {
+    audio.src = s.url;
+    audio.play().then(() => {
+      $('playBtn').textContent = 'Ⅱ';
+      $('fpPlayBtn').textContent = 'Ⅱ';
+      setTimeout(() => audio.removeAttribute('src'), 300);
+    }).catch(() => toast('Audio stream unavailable'));
   }
 }
 
-// ==========================================
-// 6. PROFILE DROPDOWN & SLEEP TIMER
-// ==========================================
-$('profileIcon').onclick = e => {
-  e.stopPropagation();
-  $('profileMenu').classList.toggle('open');
-  $('profileIcon').classList.toggle('active');
+function syncLike() {
+  const isL = liked.has(current);
+  $('likeBtn').classList.toggle('liked', isL); $('likeBtn').textContent = isL ? '♥' : '♡';
+  $('fpLikeBtn').classList.toggle('liked', isL); $('fpLikeBtn').textContent = isL ? '♥' : '♡';
+}
+
+function toggle() {
+  if (!requireAuth()) return;
+  if (current < 0) return play(0);
+  if (audio.paused) { audio.play(); $('playBtn').textContent = 'Ⅱ'; $('fpPlayBtn').textContent = 'Ⅱ'; }
+  else { audio.pause(); $('playBtn').textContent = '▶'; $('fpPlayBtn').textContent = '▶'; }
+}
+
+function toggleShuffle() {
+  shuffle = !shuffle;
+  $('shuffleBtn').classList.toggle('active-mode', shuffle);
+  $('fpShuffle').classList.toggle('active-mode', shuffle);
+  toast(shuffle ? 'Shuffle: ON' : 'Shuffle: OFF');
+}
+
+function toggleRepeat() {
+  repeatMode = (repeatMode + 1) % 3;
+  const active = repeatMode > 0;
+  const label = repeatMode === 2 ? '↻1' : '↻';
+  $('repeatBtn').textContent = label;
+  $('fpRepeat').textContent = label;
+  $('repeatBtn').classList.toggle('active-mode', active);
+  $('fpRepeat').classList.toggle('active-mode', active);
+  toast(repeatMode === 0 ? 'Repeat: OFF' : repeatMode === 1 ? 'Repeat All: ON' : 'Repeat Current Song: ON');
+}
+
+const next = () => {
+  if (!requireAuth()) return;
+  if (repeatMode === 2 && current >= 0) {
+    audio.currentTime = 0;
+    audio.play();
+    return;
+  }
+  play(shuffle ? Math.floor(Math.random() * songs.length) : (current + 1) % songs.length);
 };
 
-document.addEventListener('click', e => {
-  if (!$('profileMenu').contains(e.target) && e.target !== $('profileIcon')) {
-    $('profileMenu').classList.remove('open');
-    $('profileIcon').classList.remove('active');
+const prev = () => {
+  if (!requireAuth()) return;
+  audio.currentTime > 3 ? audio.currentTime = 0 : play((current - 1 + songs.length) % songs.length);
+};
+
+// Controls Binding
+document.querySelector('.now').onclick = openFullPlayer;
+$('closeFp').onclick = closeFullPlayer;
+$('fpLyricsBtn').onclick = () => $('fpLyricsBox').classList.toggle('open');
+$('closeLyrics').onclick = () => $('fpLyricsBox').classList.remove('open');
+$('fpDownloadBtn').onclick = () => { if (current >= 0) downloadSong(current); };
+$('heroPlay').onclick = () => { if (requireAuth()) { play(current < 0 ? 0 : current); openFullPlayer(); } };
+$('upgrade').onclick = () => { if (requireAuth()) $('fileInput').click(); };
+$('playBtn').onclick = toggle; $('fpPlayBtn').onclick = toggle;
+$('nextBtn').onclick = next; $('fpNext').onclick = next;
+$('prevBtn').onclick = prev; $('fpPrev').onclick = prev;
+$('shuffleBtn').onclick = toggleShuffle; $('fpShuffle').onclick = toggleShuffle;
+$('repeatBtn').onclick = toggleRepeat; $('fpRepeat').onclick = toggleRepeat;
+
+$('likeBtn').onclick = () => {
+  if (requireAuth() && current >= 0) {
+    liked.has(current) ? liked.delete(current) : liked.add(current);
+    saveData();
+    syncLike();
+    render();
   }
+};
+$('fpLikeBtn').onclick = $('likeBtn').onclick;
+
+$('volume').oninput = e => { audio.volume = +e.target.value; audio.muted = false; };
+audio.volume = .8;
+$('muteBtn').onclick = () => {
+  audio.muted = !audio.muted;
+  toast(audio.muted ? 'Muted' : 'Unmuted');
+};
+
+$('seek').oninput = e => { if (audio.duration) audio.currentTime = +e.target.value / 100 * audio.duration; };
+$('fpSeek').oninput = $('seek').oninput;
+
+audio.ontimeupdate = () => {
+  if (audio.duration) {
+    const p = audio.currentTime / audio.duration * 100;
+    $('seek').value = p;
+    $('fpSeek').value = p;
+    $('currentTime').textContent = fmt(audio.currentTime);
+    $('fpCurrent').textContent = fmt(audio.currentTime);
+    $('duration').textContent = fmt(audio.duration);
+    $('fpDuration').textContent = fmt(audio.duration);
+    syncLyricsHighlight(audio.currentTime);
+  }
+};
+
+audio.onended = next;
+
+// Keyboard Shortcuts (Space, Left/Right Seek, M Mute)
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.ctrlKey || e.altKey) return;
+  if (e.code === 'Space') { e.preventDefault(); toggle(); }
+  else if (e.code === 'ArrowRight' && audio.duration) { audio.currentTime = Math.min(audio.duration, audio.currentTime + 5); }
+  else if (e.code === 'ArrowLeft' && audio.duration) { audio.currentTime = Math.max(0, audio.currentTime - 5); }
+  else if (e.key.toLowerCase() === 'm') { audio.muted = !audio.muted; toast(audio.muted ? 'Muted' : 'Unmuted'); }
 });
 
-$('pmLiked').onclick = () => {
-  $('profileMenu').classList.remove('open');
-  view = 'liked';
-  activePlaylist = null;
-  setActiveNav('liked');
-  render();
-};
-
-$('pmRecent').onclick = () => {
-  $('profileMenu').classList.remove('open');
-  view = 'library';
-  activePlaylist = null;
-  setActiveNav('library');
-  render();
-};
-
-$('pmNewPl').onclick = () => {
-  $('profileMenu').classList.remove('open');
-  createNewPlaylist();
-};
-
-$('pmSleep').onclick = () => {
-  clearTimeout(sleepTimerId);
-
-  if (sleepMinutes === 0) sleepMinutes = 15;
-  else if (sleepMinutes === 15) sleepMinutes = 30;
-  else sleepMinutes = 0;
-
-  if (sleepMinutes > 0) {
-    $('pmSleepState').textContent = sleepMinutes + ' min';
-    $('sleepBadge').textContent = '⏱ ' + sleepMinutes + 'm';
-    $('sleepBadge').style.display = 'inline-block';
-
-    toast('Sleep timer set for ' + sleepMinutes + ' minutes');
-
-    sleepTimerId = setTimeout(() => {
-      audio.pause();
-      $('playBtn').textContent = '▶';
-      $('fpPlayBtn').textContent = '▶';
-      sleepMinutes = 0;
-      $('pmSleepState').textContent = 'Off';
-      $('sleepBadge').style.display = 'none';
-      toast('Sleep timer paused playback');
-    }, sleepMinutes * 60 * 1000);
-
-  } else {
-    $('pmSleepState').textContent = 'Off';
-    $('sleepBadge').style.display = 'none';
-    toast('Sleep timer turned off');
-  }
-};
-
-$('pmShortcuts').onclick = () => {
-  $('profileMenu').classList.remove('open');
-  toast('Shortcuts: Space = Play/Pause | ←/→ = Seek ±5s | M = Mute');
-};
-
-$('pmAuthAction').onclick = () => {
-  $('profileMenu').classList.remove('open');
-  openAuth();
-};
-
-// ==========================================
-// 7. CUSTOM PLAYLISTS & SIDEBAR RENDER
-// ==========================================
-function renderSidebarPlaylists() {
-  const box = $('playlistNames');
-  const names = Object.keys(customPlaylists);
-
-  box.innerHTML = names.map(name =>
-    `<button class="${view === 'playlist' && activePlaylist === name ? 'active' : ''}" data-cpl="${safe(name)}">🎵 ${safe(name)} (${customPlaylists[name].length})</button>`
-  ).join('');
-
-  box.querySelectorAll('[data-cpl]').forEach(btn => {
-    btn.onclick = () => {
-      view = 'playlist';
-      activePlaylist = btn.dataset.cpl;
-      document.querySelectorAll('.nav button').forEach(x => x.classList.remove('active'));
-      renderSidebarPlaylists();
-      render();
-    };
-  });
-}
-
-function createNewPlaylist() {
-  if (!requireAuth()) return;
-
-  const name = prompt('Enter new playlist name (e.g. Garba Hits, Chill):');
-  if (!name || !name.trim()) return;
-
-  const clean = name.trim();
-
-  if (!customPlaylists[clean]) customPlaylists[clean] = [];
-
-  saveData();
-  renderSidebarPlaylists();
-  toast('Playlist "' + clean + '" created!');
-}
-
-$('newPlaylist').onclick = createNewPlaylist;
-
-function addToCustomPlaylist(songIdx) {
-  if (!requireAuth()) return;
-
-  const names = Object.keys(customPlaylists);
-
-  if (!names.length) {
-    const first = prompt('No custom playlist yet! Enter a name to create one:');
-    if (!first || !first.trim()) return;
-
-    customPlaylists[first.trim()] = [songIdx];
-    saveData();
-    renderSidebarPlaylists();
-    toast('Added to "' + first.trim() + '"');
+// Sidebar Views & Folders
+document.querySelectorAll('.nav button[data-view]').forEach(b => b.onclick = () => {
+  const targetView = b.dataset.view;
+  if (targetView === 'search') {
+    $('searchInput').focus();
+    setActiveNav('search');
     return;
   }
-
-  const choice = prompt(
-    'Type playlist name to add song:\nAvailable: ' + names.join(', '),
-    names[0]
-  );
-
-  if (!choice || !choice.trim()) return;
-
-  const target = choice.trim();
-
-  if (!customPlaylists[target]) customPlaylists[target] = [];
-
-  if (!customPlaylists[target].includes(songIdx)) {
-    customPlaylists[target].push(songIdx);
-    saveData();
-    renderSidebarPlaylists();
-    toast('Added to "' + target + '"');
-  } else {
-    toast('Already in "' + target + '"');
-  }
-}
-
-// ==========================================
-// 8. FIREBASE AUTHENTICATION
-// ==========================================
-function openAuth() {
-  if (currentUser) {
-    if (fbAuth && fbFns) fbFns.signOut(fbAuth).catch(() => {});
-
-    currentUser = null;
-    localStorage.removeItem('mithan_user');
-    audio.pause();
-
-    $('playBtn').textContent = '▶';
-    $('fpPlayBtn').textContent = '▶';
-
-    closeFullPlayer();
-    updateAuthUI();
-    toast('Signed out');
-
-  } else {
-    $('authModal').classList.add('open');
-  }
-}
-
-function closeAuth() {
-  $('authModal').classList.remove('open');
-}
-
-function requireAuth() {
-  if (!currentUser) {
-    $('authModal').classList.add('open');
-    toast('Please sign in first');
-    return false;
-  }
-
-  return true;
-}
-
-function updateAuthUI() {
-  if (currentUser) {
-    $('authBtn').textContent = 'SIGN OUT';
-    $('authBtn').classList.add('signed-in');
-
-    $('profileIcon').textContent = currentUser.name.slice(0, 1).toUpperCase();
-    $('pmName').textContent = currentUser.name;
-    $('pmEmail').textContent = currentUser.email;
-    $('pmAuthAction').textContent = '🚪 Sign Out';
-
-    if (current < 0) {
-      $('nowArtist').textContent = 'Welcome, ' + currentUser.name;
-    }
-
-  } else {
-    $('authBtn').textContent = 'SIGN IN';
-    $('authBtn').classList.remove('signed-in');
-
-    $('profileIcon').textContent = '?';
-    $('pmName').textContent = 'Guest Listener';
-    $('pmEmail').textContent = 'Sign in to sync profile';
-    $('pmAuthAction').textContent = '🔑 Sign In / Create Account';
-
-    if (current < 0) {
-      $('nowArtist').textContent = 'Sign in to play music';
-    }
-  }
-
-  $('pmLikedCount').textContent = liked.size;
-}
-
-$('toggleAuthMode').onclick = () => {
-  isSignUpMode = !isSignUpMode;
-
-  $('loginName').style.display = isSignUpMode ? 'block' : 'none';
-  $('loginName').required = isSignUpMode;
-
-  $('authTitle').textContent = isSignUpMode
-    ? 'Create Mithan Music Account'
-    : 'Sign in to Mithan Music';
-
-  $('authSubmitBtn').textContent = isSignUpMode
-    ? 'CREATE ACCOUNT'
-    : 'SIGN IN';
-
-  $('authSwitchText').textContent = isSignUpMode
-    ? 'Already have an account?'
-    : 'New here?';
-
-  $('toggleAuthMode').textContent = isSignUpMode
-    ? 'Sign In'
-    : 'Create Account';
-};
-
-$('authForm').onsubmit = async e => {
-  e.preventDefault();
-
-  const name = $('loginName').value.trim();
-  const email = $('loginEmail').value.trim();
-  const pass = $('loginPass').value;
-
-  try {
-    if (fbAuth && fbFns) {
-      if (isSignUpMode) {
-        const cred = await fbFns.createUserWithEmailAndPassword(fbAuth, email, pass);
-
-        if (name) {
-          await fbFns.updateProfile(cred.user, { displayName: name });
-        }
-
-        currentUser = {
-          name: name || email.split('@')[0],
-          email
-        };
-
-      } else {
-        const cred = await fbFns.signInWithEmailAndPassword(fbAuth, email, pass);
-
-        currentUser = {
-          name: cred.user.displayName || email.split('@')[0],
-          email
-        };
-      }
-
-    } else {
-      currentUser = {
-        name: name || email.split('@')[0],
-        email
-      };
-    }
-
-    localStorage.setItem('mithan_user', JSON.stringify(currentUser));
-
-    updateAuthUI();
-    closeAuth();
-    $('authForm').reset();
-
-    toast('Welcome, ' + currentUser.name + '!');
-
-  } catch (err) {
-    toast(err.message.replace('Firebase: ', ''));
-  }
-};
-
-// ==========================================
-// 9. SEARCH BAR, RENDER & PLAYBACK
-// ==========================================
-function setActiveNav(v) {
-  document.querySelectorAll('.nav button').forEach(x => {
-    x.classList.toggle('active', x.dataset.view === v);
-  });
-
-  renderSidebarPlaylists();
-}
-
-$('searchInput').oninput = () => {
-  const q = $('searchInput').value.trim();
-
-  $('clearSearch').classList.toggle('show', q.length > 0);
-
-  if (q) {
-    view = 'home';
-    activePlaylist = null;
-  }
-
+  view = targetView;
+  activePlaylist = null;
+  setActiveNav(view);
   render();
-};
+});
 
-$('clearSearch').onclick = () => {
+document.querySelectorAll('.nav button[data-folder]').forEach(b => b.onclick = () => {
+  view = 'playlist';
+  activePlaylist = b.dataset.folder;
+  document.querySelectorAll('.nav button').forEach(x => x.classList.toggle('active', x === b));
+  renderSidebarPlaylists();
+  render();
+});
+
+$('viewAll').onclick = $('viewAllTop').onclick = () => {
+  view = 'home';
+  activePlaylist = null;
   $('searchInput').value = '';
   $('clearSearch').classList.remove('show');
+  setActiveNav('home');
   render();
 };
 
-async function downloadSong(idx) {
-  if (!requireAuth()) return;
+document.querySelectorAll('#featured .album').forEach(card => card.onclick = () => {
+  let pl = card.querySelector('h3').textContent.trim();
+  view = 'playlist'; activePlaylist = pl; render();
+  if (requireAuth()) { let m = songs.findIndex(s => s.album === pl); if (m !== -1) { play(m); openFullPlayer(); } }
+});
 
-  const s = songs[idx];
-  if (!s) return;
+$('fileInput').onchange = e => {
+  [...e.target.files].forEach(f => {
+    songs.push({ title: f.name.replace(/\.[^.]+$/, ''), artist: 'Local', album: 'Local', cover: '', url: URL.createObjectURL(f), duration: '—', lyrics: '' });
+  });
+  render();
+  toast('Added');
+};
 
-  toast('Preparing "' + s.title + '"...');
+songs.forEach(s => {
+  let p = new Audio();
+  p.src = s.url;
+  p.onloadedmetadata = () => { s.duration = fmt(p.duration); render(); };
+});
 
+updateAuthUI();
+renderSidebarPlaylists();
+render():
+// ==========================================
+// MITHAN STUDIO - PUBLIC SONG SYNC
+// ==========================================
+
+async function loadStudioSongs() {
   try {
-    const res = await fetch(s.url);
-    const blob = await res.blob();
+    const { createClient } = await import(
+      "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
+    );
 
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const studioClient = createClient(
+      "https://itjlkkjefeundpqfnvut.supabase.co",
+      "sb_publishable_iFwh8jKMbkg8eP9CtiBrMA_31RnNzhx"
+    );
 
-    a.href = url;
-    a.download = s.title + '.mp3';
+    const { data, error } = await studioClient
+      .from("songs")
+      .select("id,title,artist,album,audio_url,cover_url,created_at")
+      .order("created_at", { ascending: false });
 
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    if (error) throw error;
 
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    const existingUrls = new Set(songs.map(song => song.url));
 
-  } catch (e) {
-    toast('Download protected by server CORS');
+    const studioSongs = (data || [])
+      .filter(song => song.audio_url && !existingUrls.has(song.audio_url))
+      .map(song => ({
+        title: song.title || "Untitled",
+        artist: song.artist || "Unknown Artist",
+        album: song.album || "Single",
+        cover: song.cover_url || "",
+        url: song.audio_url,
+        duration: "—",
+        lyrics: "",
+        source: "studio",
+        studioId: song.id
+      }));
+
+    if (studioSongs.length > 0) {
+      songs.push(...studioSongs);
+
+      studioSongs.forEach(song => {
+        const audioCheck = new Audio();
+        audioCheck.preload = "metadata";
+        audioCheck.src = song.url;
+
+        audioCheck.onloadedmetadata = () => {
+          song.duration = fmt(audioCheck.duration);
+          render();
+        };
+      });
+
+      render();
+      console.log("Mithan Studio songs loaded:", studioSongs.length);
+    }
+
+  } catch (error) {
+    console.error("Mithan Studio Sync Error:", error);
+    toast("Studio songs could not load");
   }
 }
 
-function artHTML(s) {
-  const letter = safe(s.title.slice(0, 1).toUpperCase());
+loadStudioSongs();
 
-  return s.cover
-    ? `<img draggable="false" src="${safe(s.cover)}" onerror="this.parentElement.textContent='${letter}'">`
-    : letter;
-}
 
-function openFullPlayer() {
-  if (!requireAuth()) return;
-
-  if (current < 0 && songs.length) {
-    play(0);
-  }
-
-  $('fullPlayer').classList.add('open');
-}
-
-function closeFullPlayer() {
-  $('fullPlayer').classList.remove('open');
-}
