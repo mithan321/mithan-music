@@ -837,7 +837,8 @@ songs.forEach(s => {
 
 updateAuthUI();
 renderSidebarPlaylists();
-render():
+render();
+
 // ==========================================
 // MITHAN STUDIO - PUBLIC SONG SYNC
 // ==========================================
